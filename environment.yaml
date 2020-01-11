@@ -1,0 +1,11 @@
+name: pi_environment
+
+dependencies:
+  - python=3.4
+  - numpy
+  - matplotlib
+  - dill
+  - pandas
+
+  - pip:
+    - pyHS100
