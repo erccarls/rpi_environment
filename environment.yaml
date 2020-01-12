@@ -1,11 +1,21 @@
 name: pi_environment
+channels:
+  - defaults
+  - conda-forge
+  - rpi
+  - intel
 
 dependencies:
-  - python=3.4
+  - python=3.6
   - numpy
-  - matplotlib
-  - dill
   - pandas
+  - cython
 
   - pip:
+    - jupyter
+    - jupyterlab
     - pyHS100
+    - w1thermsensor
+    - Adafruit_DHT
+    - RPi.GPIO
+    - matplotlib
