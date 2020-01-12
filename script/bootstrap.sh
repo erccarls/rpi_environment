@@ -2,8 +2,8 @@
 
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
 
-#wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-armv7l.sh
-#bash Miniconda3-latest-Linux-armv7l.sh -b -p $HOME/miniconda
+wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-armv7l.sh
+bash Miniconda3-latest-Linux-armv7l.sh -b -p $HOME/miniconda
 
 echo export PATH=\"/home/pi/miniconda/bin:$PATH\" >> ~/.bashrc
 source ~/.bashrc
