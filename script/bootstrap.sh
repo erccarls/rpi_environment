@@ -19,4 +19,3 @@ jupyter notebook password
 
 # Enable 1-wire interface on GPIO4=header pin 7
 echo "sudo dtoverlay w1-gpio gpiopin=4 pullup=0 " >> ~/.bashrc
-echo "sudo dtoverlay w1-gpio gpiopin=17 pullup=0 " >> ~/.bashrc
