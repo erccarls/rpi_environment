@@ -1,3 +1,7 @@
+import os
+import time
+from dropbox import Dropbox
+from datetime import datetime
 import pygame
 import pygame.camera
 from pygame.locals import *
@@ -9,7 +13,7 @@ pygame.camera.init()
 class Capture:
 
     def __init__(self):
-        self.size = (640, 480)
+        self.size = (1280, 720)
         # create a display surface. standard pygame stuff
         self.display = pygame.display.set_mode(self.size, 0)
 
@@ -26,12 +30,17 @@ class Capture:
         self.snapshot = pygame.surface.Surface(self.size, 0, self.display)
         
         self.text = 'Drop yer fone to take a sick insta!'
+        self.state = "waiting"
+        self.start_time = None
+
+        self.dropbox = Dropbox(os.environ['DROPBOX_TOKEN'])
+
 
     def draw(self):
         # if you don't want to tie the framerate to the camera, you can check
         # if the camera has an image ready.  note that while this works
         # on most cameras, some will never return true.
-        if self.cam.query_image():
+        if self.cam.query_image() and self.state != "show_photo":
             self.snapshot = self.cam.get_image(self.snapshot)
 
         # blit it to the display surface.  simple!
@@ -41,11 +50,32 @@ class Capture:
         white = (255, 255, 255) 
         green = (0, 255, 0) 
         blue = (0, 0, 128)
-        font = pygame.font.Font('freesansbold.ttf', 32) 
-        text = font.render(self.text, True, green, blue) 
-        textRect = text.get_rect()
-        textRect.center = (640 // 2, int(480 * .90)) 
-        self.display.blit(text, textRect)
+        font = pygame.font.Font('freesansbold.ttf', 32)
+
+        if self.state == "countdown" or self.state == "show_photo":
+            timer = 3.99 - (time.time() - self.start_time)
+            text = str(int(timer))
+            if -1 < timer < 1:
+                text = "Say cheese!"
+            if timer < -1:
+                self.state = "show_photo"
+                text = "Photo uploading..."
+            if timer < -4:
+                self.state = "waiting"
+                text = self.text
+                filename = f"{datetime.utcnow().strftime('%y_%m_%d_%H_%M_%S')}.jpg"
+                full_path = f"/home/pi/Dropbox/photobooth/{filename}"
+                pygame.image.save(self.snapshot, full_path)
+                with open(full_path, 'rb') as f:
+                    self.dropbox.files_upload(f.read(), path=f'/photobooth_cmci_studio/{filename}')
+        else: 
+            text = self.text
+        
+
+        text_obj = font.render(text, True, green, blue) 
+        textRect = text_obj.get_rect()
+        textRect.center = (1280 // 2, int(720 * .90)) 
+        self.display.blit(text_obj, textRect)
         
         pygame.display.flip()
         
@@ -65,8 +95,16 @@ class Capture:
                     going = False
             
                 if (e.type == KEYDOWN and e.key == K_SPACE):
-                    self.text = 'spacebar pressed'
-            
-            
-cap = Capture()
-cap.main()
+                    self.trigger()
+
+
+    def trigger(self, charger_on_list=None):
+        print('Detected Charger On:', charger_on_list)
+        self.state = "countdown"
+        self.start_time = time.time()
+
+
+
+if __name__ == "__main__":            
+    cap = Capture()
+    cap.main()
